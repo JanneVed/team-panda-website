@@ -29,10 +29,10 @@ export async function getStaticProps()
 {
   const notionClient = new Client(
     {
-      auth: process.env.NOTION_AUTH_KEY,
+      auth: process.env.NOTION_TOKEN,
     }
   );
-  const database_id = process.env.PROJECT_DATABASE_ID;
+  const database_id = process.env.NOTION_DATABASE_PROJECTS_ID;
   const response = await notionClient.databases.query(
     {
       database_id,
