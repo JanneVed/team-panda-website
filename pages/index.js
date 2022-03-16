@@ -4,8 +4,8 @@ import { useEffect } from "react";
 export default function ProjectWorkers({results})
 {
   useEffect(() => {
-    console.log(results)
-  })
+    console.log(results) // show array in browser console
+  });
   const getDatabaseDisplay = () => {
     let jsx = [];
     results.forEach((projectworker) => {
@@ -15,8 +15,8 @@ export default function ProjectWorkers({results})
           <p>Status: {projectworker.properties.Status.select.name}</p>
           <p>Hours: {projectworker.properties.Hours.number}</p>
           <p>Worked hours: {projectworker.properties['Worked hours'].rollup.number}</p>
-          <p>Hours left: {projectworker.properties['Hours left'].Formula.number}</p>
-          <p>Timespan: {}</p>
+          <p>Hours left: {projectworker.properties['Hours left'].formula.number}</p>
+          <p>Timespan: {projectworker.properties.Timespan.date.start} &rArr; {projectworker.properties.Timespan.date.end}</p>
         </div>
       );
     });
@@ -33,16 +33,18 @@ export async function getStaticProps()
     }
   );
   const database_id = process.env.NOTION_DATABASE_PROJECTS_ID;
+  // const people_database_id = process.env.NOTION_DATABASE_PEOPLE_ID;
+  // const timereport_database_id = process.env.NOTION_DATABASE_TIMEREPORTS_ID;
   const response = await notionClient.databases.query(
     {
       database_id,
     }
   );
-  console.log(response);
+  console.log(response); // show in terminal
   return{
     props:
     {
       results: response.results
     }
-  }
-}
+  };
+};
