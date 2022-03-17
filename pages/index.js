@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { useEffect } from "react";
+import styles from "../styles/Home.module.css";
 
 export default function ProjectWorkers({results})
 {
@@ -10,7 +11,7 @@ export default function ProjectWorkers({results})
     let jsx = [];
     results.forEach((projectworker) => {
       jsx.push(
-        <div className="card" key={projectworker.id}>
+        <div className={styles.card} key={projectworker.id}>
           <h3>Project: {projectworker.properties.Projectname.title[0].plain_text}</h3>
           <p>Status: {projectworker.properties.Status.select.name}</p>
           <p>Hours: {projectworker.properties.Hours.number}</p>
