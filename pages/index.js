@@ -1,51 +1,131 @@
 import { Client } from "@notionhq/client";
-import { useEffect } from "react";
+import { useState } from "react";
+import Select from "react-select";
 import styles from "../styles/Home.module.css";
 
-export default function ProjectWorkers({results})
-{
-  useEffect(() => {
-    console.log(results) // show array in browser console
-  });
-  const getDatabaseDisplay = () => {
-    let jsx = [];
+const HomePage = ({results}) => {
+
+  // makes an array of eployees with id and name.
+  const getEmployeeInfo = () => {
+    const person = [];
     results.forEach((projectworker) => {
-      jsx.push(
-        <div className={styles.card} key={projectworker.id}>
-          <h3>Project: {projectworker.properties.Projectname.title[0].plain_text}</h3>
-          <p>Status: {projectworker.properties.Status.select.name}</p>
-          <p>Hours: {projectworker.properties.Hours.number}</p>
-          <p>Worked hours: {projectworker.properties['Worked hours'].rollup.number}</p>
-          <p>Hours left: {projectworker.properties['Hours left'].formula.number}</p>
-          <p>Timespan: {projectworker.properties.Timespan.date.start} &rArr; {projectworker.properties.Timespan.date.end}</p>
-        </div>
-      );
+      person.push({
+        id: projectworker.id,
+        employee: projectworker.properties.Name.title[0].plain_text,
+        total_hours:projectworker.properties['Total hours'].rollup.number});
     });
-    return jsx;
+    return person
   };
-  return <div>{getDatabaseDisplay()}</div>;
+
+  // send the names for the employee to the select.
+  const postEmployeeNames = () => {
+    const employees = [];
+    const employeeArray = getEmployeeInfo();
+    employeeArray.forEach(element => {
+      employees.push(<option value={element.id} key={element.id}>{element.employee}</option>)
+    });
+    return employees;
+  }
+  
+  const getEmloyeeHours = (selected) => {
+    let totalHours;
+    let employeeHours = [];
+    const selectedId = selected
+    results.forEach(element => {
+      employeeHours.push({
+        id: element.id,
+        hours: element.properties['Total hours'].rollup.number
+      })
+      if (selectedId === element.id) {
+        totalHours = element.properties['Total hours'].rollup.number
+      }
+    });
+    return totalHours;
+  }
+
+  const [Selects, setSelects] = useState();
+
+  return <div>
+    <h1>Home Page</h1>
+    <form>
+      <label form="people">Employee: </label>
+      <select value={Selects} onChange={e => setSelects(e.target.value)} className="people">
+        <option disabled selected>Select Employee</option>
+        {postEmployeeNames()}
+      </select>
+    </form>
+    <p>Total hours: {getEmloyeeHours(Selects)}</p>
+  </div>;
 };
+
+export default HomePage;
 
 export async function getStaticProps()
 {
-  const notionClient = new Client(
+  for (let database = 1; database < 2; database++)
+  {
+    if (database == 0)
     {
-      auth: process.env.NOTION_TOKEN,
-    }
-  );
-  const database_id = process.env.NOTION_DATABASE_PROJECTS_ID;
-  // const people_database_id = process.env.NOTION_DATABASE_PEOPLE_ID;
-  // const timereport_database_id = process.env.NOTION_DATABASE_TIMEREPORTS_ID;
-  const response = await notionClient.databases.query(
+      const notionClient = new Client(
+        {
+          auth: process.env.NOTION_TOKEN,
+        }
+      );
+      const database_id = process.env.NOTION_DATABASE_PROJECTS_ID;
+      const response = await notionClient.databases.query(
+        {
+          database_id,
+        }
+      );
+      console.log(response); // show in terminal
+      return{
+        props:
+        {
+          results: response.results
+        }
+      };
+    };
+    if (database == 1)
     {
-      database_id,
-    }
-  );
-  console.log(response); // show in terminal
-  return{
-    props:
+      const notionClient = new Client(
+        {
+          auth: process.env.NOTION_TOKEN,
+        }
+      );
+      const database_id = process.env.NOTION_DATABASE_PEOPLE_ID;
+      const response = await notionClient.databases.query(
+        {
+          database_id,
+        }
+      );
+      console.log(response); // show in terminal
+      return{
+        props:
+        {
+          results: response.results
+        }
+      };
+    };
+    if (database == 2)
     {
-      results: response.results
-    }
+      const notionClient = new Client(
+        {
+          auth: process.env.NOTION_TOKEN,
+        }
+      );
+      const database_id = process.env.NOTION_DATABASE_TIMEREPORTS_ID;
+      const response = await notionClient.databases.query(
+        {
+          database_id,
+        }
+      );
+      console.log(response); // show in terminal
+      return{
+        props:
+        {
+          results: response.results
+        }
+      };
+    };
   };
 };
