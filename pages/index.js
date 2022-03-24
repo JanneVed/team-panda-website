@@ -1,7 +1,6 @@
 import { Client } from "@notionhq/client";
 import { useState } from "react";
-import Select from "react-select";
-import styles from "../styles/Home.module.css";
+import styles from '../styles/Home.module.css';
 
 const HomePage = (props) => {
 
@@ -45,10 +44,23 @@ const HomePage = (props) => {
     return totalHours;
   }
 
-  const [Selects, setSelects] = useState();
+  const getEmployeeName = (selected) => {
+    let employeeName;
 
-  return <div>
-    <h1>Home Page</h1>
+    props.data[1].forEach(element => {
+
+      if (selected === element.id) {
+        employeeName = element.properties.Name.title[0].plain_text
+      }
+    })
+    return employeeName;
+  }
+  // Home page return
+  const [Selects, setSelects] = useState();
+  return <div className={styles.content}>
+    <div className={styles.homePageHeader}>
+      <h1>Home Page</h1>
+    </div>
     <form>
       <label form="people">Employee: </label>
       <select value={Selects} onChange={e => setSelects(e.target.value)} className="people">
@@ -56,7 +68,11 @@ const HomePage = (props) => {
         {postEmployeeNames()}
       </select>
     </form>
-    <p>Total hours: {getEmloyeeHours(Selects)}</p>
+    <div className={styles.homePageContent}>
+      <p>Employee: {getEmployeeName(Selects)}</p>
+      <p>Total hours: {getEmloyeeHours(Selects)}</p>
+      {console.log("Employee Selected: "+ getEmployeeName(Selects) + "\n\n" + "User Id: " + Selects)}
+    </div>
   </div>;
 };
 
