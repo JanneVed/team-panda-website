@@ -6,55 +6,50 @@ const HomePage = (props) => {
 
   //console.log(props.data);
 
-  // makes an array of eployees with id and name.
+  // Makes an array of eployees with id and name.
   const getEmployeeInfo = () => {
     const person = [];
     props.data[1].forEach((projectworker) => {
       person.push({
         id: projectworker.id,
         employee: projectworker.properties.Name.title[0].plain_text,
-        total_hours:projectworker.properties['Total hours'].rollup.number});
+        total_hours: projectworker.properties['Total hours'].rollup.number});
     });
     return person
   };
 
-  // send the names for the employee to the select.
-  const postEmployeeNames = () => {
+  // Send the names for the employee to the select.
+  const dropdownNames = () => {
     const employees = [];
-    const employeeArray = getEmployeeInfo();
-    employeeArray.forEach(element => {
+    getEmployeeInfo().forEach(element => {
       employees.push(<option value={element.id} key={element.id}>{element.employee}</option>)
     });
     return employees;
   }
+
   // Show total hours for selected employee
   const getEmloyeeHours = (selected) => {
     let totalHours;
-    let employeeHours = [];
-    const selectedId = selected
-    props.data[1].forEach(element => {
-      employeeHours.push({
-        id: element.id,
-        hours: element.properties['Total hours'].rollup.number
-      })
-      if (selectedId === element.id) {
-        totalHours = element.properties['Total hours'].rollup.number
+    getEmployeeInfo().forEach(element => {
+      if (selected === element.id) {
+        totalHours = element.total_hours
       }
     });
     return totalHours;
   }
 
+  // Calls getEmployeeInfo, compares selected person in dropdown and gets employee name
   const getEmployeeName = (selected) => {
     let employeeName;
 
-    props.data[1].forEach(element => {
-
+    getEmployeeInfo().forEach(element => {
       if (selected === element.id) {
-        employeeName = element.properties.Name.title[0].plain_text
+        employeeName = element.employee
       }
     })
     return employeeName;
   }
+  
   // Home page return
   const [Selects, setSelects] = useState();
   return <div className={styles.content}>
@@ -65,7 +60,7 @@ const HomePage = (props) => {
       <label form="people">Employee: </label>
       <select value={Selects} onChange={e => setSelects(e.target.value)} className="people">
         <option disabled selected>Select Employee</option>
-        {postEmployeeNames()}
+        {dropdownNames()}
       </select>
     </form>
     <div className={styles.homePageContent}>
