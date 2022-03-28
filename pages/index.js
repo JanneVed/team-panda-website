@@ -1,5 +1,8 @@
 import { Client } from "@notionhq/client";
 import { useState } from "react";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 import styles from '../styles/Home.module.css';
 
 const HomePage = (props) => {
@@ -87,35 +90,76 @@ const HomePage = (props) => {
     return projectsName;
   };
 
+  const submitForm = async (e) => {
+    e.preventDefault();
+    const response = await fetch(`http://localhost:${location.port}/api/sending`, {
+      method: "POST",
+      body: JSON.stringify({PeopleId, ProjectId, ReportDate, WorkedHours, Notes}),
+    });
+    if (response.status === 201) {
+      alert("Report sent!")
+    } else {
+      alert("Report not sent! Error!")
+    }
+  }
+
   // Home page return
   const [PeopleId, setPeopleId] = useState();
   const [ProjectId, setProjectId] = useState();
+  const [ReportDate, setReportDate] = useState(new Date());
+  const [WorkedHours, setWorkedHours] = useState();
+  const [Notes, setNotes] = useState();
 
   return <div className={styles.content}>
     <div className={styles.homePageHeader}>
       <h1>Home Page</h1>
     </div>
-    <form>
-      <label form="people">Employee: </label>
-      <select value={PeopleId} onChange={e => setPeopleId(e.target.value)} className="people">
-        <option disabled selected>Select Employee</option>
-        {dropdownNames()}
-      </select>
-    </form>
     <div className={styles.homePageContent}>
-      <p>Date</p>
-      <p>Selected Person</p>
-      <p>Hours</p>
-      <form>
-        <label form="projects">Projects: </label>
-        <select value={ProjectId} onChange={e => setProjectId(e.target.value)} className="projects">
+      <form onSubmit={submitForm}>
+        <label htmlFor="employees">Employee: </label>
+        <br/>
+        <select name="employees" value={PeopleId} onChange={e => setPeopleId(e.target.value)}>
+          <option disabled selected>Select Employee</option>
+          {dropdownNames()}
+        </select>
+        <br/>
+        <label htmlFor="date-selecter">Date for Report: </label>
+        <br/>
+        <DatePicker name="date-selecter" selected={ReportDate} onChange={(date) => setReportDate(date)} required />
+
+        <label htmlFor="hours">Hours Worked: </label>
+        <br/>
+        <input
+          type="number"
+          name="hours"
+          value={WorkedHours}
+          onChange={(e) => setWorkedHours(e.target.value)}
+          required
+        />
+        <br/>
+        <label htmlFor="projects">Projects: </label>
+        <br/>
+        <select name="projects" value={ProjectId} onChange={e => setProjectId(e.target.value)}>
           <option disabled selected>Select Project</option>
           {dropdownProjects()}
-      </select>
+        </select>
+        <br/>
+        <label htmlFor="notes">Notes: </label>
+        <br/>
+        <input
+          type="text"
+          name="notes"
+          value={Notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+        <br/>
+        <br/>
+        <button type="submit">Submit Report</button>
       </form>
+      {console.log(props.data)}
       {/* <p>Employee: {getEmployeeName(PeopleId)}</p>
-      <p>Total hours: {getEmloyeeHours(PeopleId)}</p> */}
-      {console.log(`Employee Selected: ${getEmployeeName(PeopleId)}\nTotal hours: ${getEmloyeeHours(PeopleId)}\nUser Id: ${PeopleId}\n\nProject Selected: ${getProjectName(ProjectId)}\nProject Id: ${ProjectId}`)}
+      <p>Total hours: {getEmloyeeHours(PeopleId)}</p>
+      {console.log(`Employee Selected: ${getEmployeeName(PeopleId)}\nTotal hours: ${getEmloyeeHours(PeopleId)}\nUser Id: ${PeopleId}\n\nProject Selected: ${getProjectName(ProjectId)}\nProject Id: ${ProjectId}`)} */}
     </div>
   </div>;
 };
@@ -152,7 +196,7 @@ async function getProjects(client)
     }
   );
 
-  console.log("projects:" + response.results);
+  console.log(response.results);
 
   return response.results;
 };
@@ -165,7 +209,7 @@ async function getPeople(client)
     }
   );
 
-  console.log("people:" + response.results);
+  console.log(response.results);
 
   return response.results;
 }
@@ -177,7 +221,7 @@ async function getTimereports(client)
       database_id: process.env.NOTION_DATABASE_TIMEREPORTS_ID,
     }
   );
-  console.log("timereports:" + response.results);
+  console.log(response.results);
 
   return response.results;
 }
