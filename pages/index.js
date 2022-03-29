@@ -105,10 +105,10 @@ const HomePage = (props) => {
   }
 
   // Use states
-  const [PeopleId, setPeopleId] = useState("");
-  const [ProjectId, setProjectId] = useState("");
+  const [PeopleId, setPeopleId] = useState("Select Employee");
+  const [ProjectId, setProjectId] = useState("Select Project");
   const [ReportDate, setReportDate] = useState(new Date());
-  const [WorkedHours, setWorkedHours] = useState(0);
+  const [WorkedHours, setWorkedHours] = useState(null);
   const [Notes, setNotes] = useState("");
 
   return <div className={styles.content}>
@@ -126,12 +126,14 @@ const HomePage = (props) => {
         <label htmlFor="employees">Employee: </label>
         <br/>
         <select name="employees" value={PeopleId} onChange={e => setPeopleId(e.target.value)}>
+          <option disabled selected>Select Employee</option>
           {dropdownNames()}
         </select>
         <br/>
         <label htmlFor="date-selecter">Date for Report: </label>
         <br/>
-        <DatePicker name="date-selecter" selected={ReportDate} onChange={(date) => setReportDate(date)} required />
+        <input type="date" name="date-selecter" value={ReportDate} onChange={e => setReportDate(e.target.value)}/>
+        <br/>
         <label htmlFor="hours">Hours Worked: </label>
         <br/>
         <input
@@ -145,6 +147,7 @@ const HomePage = (props) => {
         <label htmlFor="projects">Projects: </label>
         <br/>
         <select name="projects" value={ProjectId} onChange={e => setProjectId(e.target.value)}>
+          <option disabled selected>Select Project</option>
           {dropdownProjects()}
         </select>
         <br/>
