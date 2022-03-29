@@ -138,7 +138,7 @@ const HomePage = (props) => {
           type="number"
           name="hours"
           value={WorkedHours}
-          onChange={(e) => setWorkedHours(e.target.value)}
+          onChange={(e) => setWorkedHours(Number(e.target.value))}
           required
         />
         <br/>
