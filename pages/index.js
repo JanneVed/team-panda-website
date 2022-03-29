@@ -41,7 +41,7 @@ const HomePage = (props) => {
   //   })
   // }
 
-  // Send the names for the employee to the select.
+  // Creates Employee names in the employee select.
   const dropdownNames = () => {
     const employees = [];
     getEmployeeInfo().forEach(element => {
@@ -49,29 +49,7 @@ const HomePage = (props) => {
     });
     return employees;
   };
-
-  // Show total hours for selected employee
-  const getEmloyeeHours = (selected) => {
-    let totalHours;
-    getEmployeeInfo().forEach(element => {
-      if (selected === element.id) {
-        totalHours = element.total_hours
-      }
-    });
-    return totalHours;
-  };
-
-  // Calls getEmployeeInfo, compares selected person in dropdown and gets employee name
-  const getEmployeeName = (Id) => {
-    let employeeName;
-    getEmployeeInfo().forEach(element => {
-      if (Id === element.id) {
-        employeeName = element.employee
-      }
-    })
-    return employeeName;
-  };
-
+  // Creates Project names in the project select.
   const dropdownProjects = () => {
     const projects = [];
     getProjectsInfo().forEach(element => {
@@ -80,16 +58,39 @@ const HomePage = (props) => {
     return projects;
   };
 
-  const getProjectName = (Id) => {
-    let projectsName;
-    getProjectsInfo().forEach(element => {
-      if (Id === element.id) {
-        projectsName = element.projectName
-      }
-    });
-    return projectsName;
-  };
+  // Show total hours for selected employee
+  // const getEmloyeeHours = (selected) => {
+  //   let totalHours;
+  //   getEmployeeInfo().forEach(element => {
+  //     if (selected === element.id) {
+  //       totalHours = element.total_hours
+  //     }
+  //   });
+  //   return totalHours;
+  // };
 
+  // Calls getEmployeeInfo, compares selected person in dropdown and gets employee name
+  // const getEmployeeName = (Id) => {
+  //   let employeeName;
+  //   getEmployeeInfo().forEach(element => {
+  //     if (Id === element.id) {
+  //       employeeName = element.employee
+  //     }
+  //   })
+  //   return employeeName;
+  // };
+
+  // const getProjectName = (Id) => {
+  //   let projectsName;
+  //   getProjectsInfo().forEach(element => {
+  //     if (Id === element.id) {
+  //       projectsName = element.projectName
+  //     }
+  //   });
+  //   return projectsName;
+  // };
+
+  // Submits the form to notion.
   const submitForm = async (e) => {
     e.preventDefault();
     const response = await fetch(`http://localhost:${location.port}/api/sending`, {
@@ -99,34 +100,38 @@ const HomePage = (props) => {
     if (response.status === 201) {
       alert("Report sent!")
     } else {
-      alert("Report not sent! Error!")
+      alert("Report not sent! Check the terminal window for more information")
     }
   }
 
-  // Home page return
-  const [PeopleId, setPeopleId] = useState();
-  const [ProjectId, setProjectId] = useState();
+  // Use states
+  const [PeopleId, setPeopleId] = useState("");
+  const [ProjectId, setProjectId] = useState("");
   const [ReportDate, setReportDate] = useState(new Date());
-  const [WorkedHours, setWorkedHours] = useState();
-  const [Notes, setNotes] = useState();
+  const [WorkedHours, setWorkedHours] = useState(0);
+  const [Notes, setNotes] = useState("");
 
   return <div className={styles.content}>
     <div className={styles.homePageHeader}>
       <h1>Home Page</h1>
     </div>
     <div className={styles.homePageContent}>
+      {console.log(PeopleId)}
+      {console.log(ProjectId)}
+      {console.log(ReportDate)}
+      {console.log(WorkedHours)}
+      {console.log(Notes)}
+
       <form onSubmit={submitForm}>
         <label htmlFor="employees">Employee: </label>
         <br/>
         <select name="employees" value={PeopleId} onChange={e => setPeopleId(e.target.value)}>
-          <option disabled selected>Select Employee</option>
           {dropdownNames()}
         </select>
         <br/>
         <label htmlFor="date-selecter">Date for Report: </label>
         <br/>
         <DatePicker name="date-selecter" selected={ReportDate} onChange={(date) => setReportDate(date)} required />
-
         <label htmlFor="hours">Hours Worked: </label>
         <br/>
         <input
@@ -140,7 +145,6 @@ const HomePage = (props) => {
         <label htmlFor="projects">Projects: </label>
         <br/>
         <select name="projects" value={ProjectId} onChange={e => setProjectId(e.target.value)}>
-          <option disabled selected>Select Project</option>
           {dropdownProjects()}
         </select>
         <br/>
