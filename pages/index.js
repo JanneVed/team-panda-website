@@ -7,40 +7,52 @@ import styles from '../styles/Home.module.css';
 
 const HomePage = (props) => {
 
-  //console.log(props.data);
+  console.log(props.data[1])
 
-  // Makes an array of employees with id and name.
+// #region Get information from notion database
+  // Get every Employee.
   const getEmployeeInfo = () => {
-    const persons = [];
-    props.data[1].forEach(person => {
-      persons.push({
-        id: person.id,
-        employee: person.properties.Name.title[0].plain_text,
-        total_hours: person.properties['Total hours'].rollup.number});
+    const employees = [];
+    props.data[1].forEach(employee => {
+      employees.push({
+        id: employee.id,
+        employee: employee.properties.Name.title[0].plain_text,
+        role: employee.properties.Role.rich_text[0].plain_text,
+        total_hours: employee.properties['Total hours'].rollup.number});
     });
-    return persons
+    return employees
   };
-  // Makes an array of all projects from notion database
+
+  // Get every Project.
   const getProjectsInfo = () => {
     const projects = [];
     props.data[0].forEach(project => {
       projects.push({
         id: project.id,
         projectName: project.properties.Projectname.title[0].plain_text,
-        status: project.properties.Status
+        status: project.properties.Status.select.name,
       });
     });
-    return projects
+    return projects;
   };
 
-  // const getTimereportsInfo = () => {
-  //   const reports = [];
-  //   props.data[2].forEach(report => {
-  //     reports.push({
-  //     })
-  //   })
-  // }
+  // Get every Timereport.
+  const getTimereportsInfo = () => {
+    const reports = [];
+    props.data[2].forEach(report => {
+      reports.push({
+        date: report.properties.Date.date.start,
+        hours: report.properties.Hours.number,
+        note: report.properties.Note.title[0].plain_text,
+        person: report.properties.Person.relation[0].id,
+        project: report.properties.Project.relation[0].id,
+      })
+    })
+    return reports;
+  }
+// #endregion
 
+// #region Drop Downs
   // Creates Employee names in the employee select.
   const dropdownNames = () => {
     const employees = [];
@@ -58,6 +70,71 @@ const HomePage = (props) => {
     return projects;
   };
 
+  const dropdownStatus = () => {
+    const projects = [];
+    getProjectsInfo().forEach(element => {
+      projects.push(<option value={element.status} key={element.id}>{element.status}</option>)
+    });
+    return projects;
+  };
+// #endregion
+
+// #region Page display functions
+  const getEmployeeReports = () => {
+    let reportArray = [];
+    getTimereportsInfo().forEach(report => {
+      if (PeopleId === report.person) {
+        getProjectsInfo().forEach(project => {
+          if (project.id === report.project) {
+            reportArray.push(<div>
+              <h3>{project.projectName}</h3>
+              <p>{report.date}</p>
+              <p>{report.hours}</p>
+              <p>{report.note}</p>
+            </div>)
+          };
+        });
+      };
+    });
+
+    return reportArray;
+  };
+
+  const getEmployeeProjectsStatus = (status) => {
+    const projects = [];
+    getProjectsInfo().forEach(project => {
+      if (project.status == status) {
+        projects.push(<p>{project.projectName}</p>)
+      };
+    })
+    return projects;
+  }
+
+  const displayPage = (role) => {
+      if (role === "Employee") {
+        return <div>
+
+        </div>
+      };
+      if (role === "Boss") {
+        return <div>
+
+        </div>
+      };
+      if (role === "Project Leader") {
+        return <div>
+
+        </div>
+      };
+      if (role === "Owner") {
+        return <div>
+
+        </div>
+      };
+  };
+// #endregion
+
+// #region Old Stuff
   // Show total hours for selected employee
   // const getEmloyeeHours = (selected) => {
   //   let totalHours;
@@ -89,7 +166,9 @@ const HomePage = (props) => {
   //   });
   //   return projectsName;
   // };
+// #endregion
 
+// #region Submit Forms
   // Submits the form to notion.
   const submitForm = async (e) => {
     e.preventDefault();
@@ -103,25 +182,26 @@ const HomePage = (props) => {
       alert("Report not sent! Check the terminal window for more information")
     }
   }
+// #endregion
 
-  // Use states
+// #region UseStates
   const [PeopleId, setPeopleId] = useState("Select Employee");
   const [ProjectId, setProjectId] = useState("Select Project");
   const [ReportDate, setReportDate] = useState(new Date());
   const [WorkedHours, setWorkedHours] = useState(null);
   const [Notes, setNotes] = useState("");
+  const [ProjectStatus, setProjectStatus] = useState("Select project status");
+// #endregion
 
+// #region Main Page Render
   return <div className={styles.content}>
     <div className={styles.homePageHeader}>
       <h1>Home Page</h1>
     </div>
     <div className={styles.homePageContent}>
-      {console.log(PeopleId)}
-      {console.log(ProjectId)}
-      {console.log(ReportDate)}
-      {console.log(WorkedHours)}
-      {console.log(Notes)}
+      <div>
 
+      </div>
       <form onSubmit={submitForm}>
         <label htmlFor="employees">Employee: </label>
         <br/>
@@ -132,7 +212,12 @@ const HomePage = (props) => {
         <br/>
         <label htmlFor="date-selecter">Date for Report: </label>
         <br/>
-        <input type="date" name="date-selecter" value={ReportDate} onChange={e => setReportDate(e.target.value)}/>
+        <input
+          type="date"
+          name="date-selecter"
+          value={ReportDate}
+          onChange={e => setReportDate(e.target.value)}
+          required/>
         <br/>
         <label htmlFor="hours">Hours Worked: </label>
         <br/>
@@ -140,9 +225,8 @@ const HomePage = (props) => {
           type="number"
           name="hours"
           value={WorkedHours}
-          onChange={(e) => setWorkedHours(Number(e.target.value))}
-          required
-        />
+          onChange={e => setWorkedHours(Number(e.target.value))}
+          required/>
         <br/>
         <label htmlFor="projects">Projects: </label>
         <br/>
@@ -158,77 +242,91 @@ const HomePage = (props) => {
           name="notes"
           value={Notes}
           onChange={(e) => setNotes(e.target.value)}
-        />
+          required/>
         <br/>
         <br/>
         <button type="submit">Submit Report</button>
       </form>
       {console.log(props.data)}
-      {/* <p>Employee: {getEmployeeName(PeopleId)}</p>
-      <p>Total hours: {getEmloyeeHours(PeopleId)}</p>
-      {console.log(`Employee Selected: ${getEmployeeName(PeopleId)}\nTotal hours: ${getEmloyeeHours(PeopleId)}\nUser Id: ${PeopleId}\n\nProject Selected: ${getProjectName(ProjectId)}\nProject Id: ${ProjectId}`)} */}
+    </div>
+
+    <div>
+      <form>
+        <select name="project-status" value={ProjectStatus} onChange={e => setProjectStatus(e.target.value)}>
+          <option disabled selected>Select project status</option>
+          {dropdownStatus()}
+        </select>
+      </form>
+      {getEmployeeProjectsStatus(ProjectStatus)}
+    </div>
+
+    <div>
+      {getEmployeeReports()}
     </div>
   </div>;
+// #endregion
 };
 
 export default HomePage;
 
-export async function getStaticProps()
-{
-  let data = [];
-  const notionClient = new Client(
-    {
-      auth: process.env.NOTION_TOKEN,
-    }
-  );
-  
-  data.push(await getProjects(notionClient));
+// #region Getting from notion API
+  export async function getStaticProps()
+  {
+    let data = [];
+    const notionClient = new Client(
+      {
+        auth: process.env.NOTION_TOKEN,
+      }
+    );
+    
+    data.push(await getProjects(notionClient));
 
-  data.push(await getPeople(notionClient));
+    data.push(await getPeople(notionClient));
 
-  data.push(await getTimereports(notionClient));
+    data.push(await getTimereports(notionClient));
 
-  return {
-    props: {
-      data,
-    },
+    return {
+      props: {
+        data,
+      },
+    };
   };
-};
-// Get Projects
-async function getProjects(client)
-{
-  let response = await client.databases.query(
-    {
-      database_id: process.env.NOTION_DATABASE_PROJECTS_ID,
-    }
-  );
+  // Get Projects
+  async function getProjects(client)
+  {
+    let response = await client.databases.query(
+      {
+        database_id: process.env.NOTION_DATABASE_PROJECTS_ID,
+      }
+    );
 
-  console.log(response.results);
+    console.log(response.results);
 
-  return response.results;
-};
-// Get People
-async function getPeople(client)
-{
-  let response = await client.databases.query(
-    {
-      database_id: process.env.NOTION_DATABASE_PEOPLE_ID,
-    }
-  );
+    return response.results;
+  };
+  // Get People
+  async function getPeople(client)
+  {
+    let response = await client.databases.query(
+      {
+        database_id: process.env.NOTION_DATABASE_PEOPLE_ID,
+      }
+    );
 
-  console.log(response.results);
+    console.log(response.results);
 
-  return response.results;
-}
-// Get Timereports
-async function getTimereports(client)
-{
-  let response = await client.databases.query(
-    {
-      database_id: process.env.NOTION_DATABASE_TIMEREPORTS_ID,
-    }
-  );
-  console.log(response.results);
+    return response.results;
+  }
+  // Get Timereports
+  async function getTimereports(client)
+  {
+    let response = await client.databases.query(
+      {
+        database_id: process.env.NOTION_DATABASE_TIMEREPORTS_ID,
+      }
+    );
+    console.log(response.results);
 
-  return response.results;
-}
+    return response.results;
+  }
+// #endregion
