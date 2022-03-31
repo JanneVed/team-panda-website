@@ -1,18 +1,46 @@
+@media only screen and (max-width: 600px) {
+  .content {
+    background-color: lightblue;
+  }
+}
 .content
 {
   padding: 1vh;
   color: lime;
+  min-height: 100%;
+  position: relative;
 }
 .homePageHeader
 {
   text-align: center;
-  color: blue;
+  color: rgb(0, 0, 114);
 }
-.homePageHeader h1 
+.homePageHeader h1
 {
-  margin: 0vh;
+  margin: 2vh;
+  font-family:'Times New Roman', Times, serif;
+  font-size: 5em;
+  font-style: italic;
+  text-transform: uppercase;
+  background-image: linear-gradient(blue, black);
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+}
+.meaning {
+  font-size: 12px;
+  font-style: italic;
 }
 .homePageContent
 {
   color: Red;
+}
+.footer {
+  background-color: rgb(0, 0, 114);
+  text-align: center;
+  color: #ccc;
+  padding: 20px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }
