@@ -87,7 +87,8 @@ const HomePage = (props) => {
         getProjectsInfo().forEach(project => {
           if (project.status === status) {
             if (project.id === report.project) {
-              reportArray.push(<div>
+              reportArray.push(
+              <div className={styles.projectCard}>
                 <h3>{project.projectName}</h3>
                 <p>Report date: {report.date}</p>
                 <p>Reported hours: {report.hours}</p>
@@ -131,8 +132,8 @@ const HomePage = (props) => {
 
   const displayPage = (role) => {
       if (role === "Employee") {
-        return <div>
-          <div>
+        return <>
+          <div className={styles.reporting}>
             <form onSubmit={submitForm}>
               <label htmlFor="date-selecter">Date for Report: </label>
               <br/>
@@ -173,7 +174,7 @@ const HomePage = (props) => {
             </form>
           </div>
 
-          <div>
+          <div className={styles.showReports}>
             <form>
               <select name="project-status" value={ProjectStatus} onChange={e => setProjectStatus(e.target.value)}>
                 <option disabled selected>Select project status</option>
@@ -182,7 +183,7 @@ const HomePage = (props) => {
             </form>
             {getEmployeeReports(ProjectStatus)}
           </div>
-        </div>
+        </>
       };
       if (role === "Boss") {
         return <div>
@@ -341,12 +342,12 @@ const HomePage = (props) => {
     <main>
       <div className={styles.homePageHeader}>
         <h1>Nexus</h1>
-        <p className={styles.meaning}>(ˈnɛksəs) n, pl. A means of connection between members of a group or things in a series.</p>
+        <p className={styles.meaning}>Nexus - A means of connection between members of a group or things in a series.</p>
         <h2>Time reports</h2>
       </div>
 
       <div className={styles.homePageContent}>
-        <div> 
+        <div className={styles.selectEmployee}> 
           <form>
             <label htmlFor="employees">Employee: </label>
             <br/>

@@ -1,14 +1,19 @@
-@media only screen and (max-width: 600px) {
-  .content {
-    background-color: lightblue;
+@media only screen and (max-width: 550px) {
+  .homePageContent {
+    flex-direction: column;
+    margin: 0 10px;
   }
 }
 .content
 {
-  padding: 1vh;
-  color: lime;
-  min-height: 100%;
+  color: rgb(0, 0, 114);
+  height: 100vh;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
+  margin: 0 auto;
 }
 .homePageHeader
 {
@@ -19,7 +24,7 @@
 {
   margin: 2vh;
   font-family:'Times New Roman', Times, serif;
-  font-size: 5em;
+  font-size: 4em;
   font-style: italic;
   text-transform: uppercase;
   background-image: linear-gradient(blue, black);
@@ -32,14 +37,26 @@
 }
 .homePageContent
 {
-  color: Red;
+  display: flex;
+  justify-content: space-between;
+}
+.selectEmployee {
+  padding-left: 10px;
+}
+.showReports {
+  padding-right: 10px;
+}
+.projectCard {
+  border: 3px solid rgb(0, 140, 255);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 10px;
 }
 .footer {
   background-color: rgb(0, 0, 114);
   text-align: center;
   color: #ccc;
   padding: 20px;
-  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
