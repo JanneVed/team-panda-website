@@ -1,3 +1,7 @@
+
+https://www.notion.so/91e2227dfd48479a92246f5e2112fde6?v=894fe1b05d064176b0d4e180b490035c
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
