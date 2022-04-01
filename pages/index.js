@@ -7,7 +7,7 @@ import styles from '../styles/Home.module.css';
 
 const HomePage = (props) => {
 
-  //console.log(props.data[1])
+  console.log(props.data[0])
 
 // #region Get information from notion database
   // Get every Employee.
@@ -30,6 +30,9 @@ const HomePage = (props) => {
       projects.push({
         id: project.id,
         projectName: project.properties.Projectname.title[0].plain_text,
+        projectHours: project.properties.Hours.number,
+        projectProgress: project.properties["Worked hours"].rollup.number,
+        projectHoursLeft: project.properties["Hours left"].formula.number,
         status: project.properties.Status.select.name,
       });
     });
@@ -41,6 +44,7 @@ const HomePage = (props) => {
     const reports = [];
     props.data[2].forEach(report => {
       reports.push({
+        id: report.id,
         date: report.properties.Date.date.start,
         hours: report.properties.Hours.number,
         note: report.properties.Note.title[0].plain_text,
@@ -57,7 +61,7 @@ const HomePage = (props) => {
   const dropdownNames = () => {
     const employees = [];
     getEmployeeInfo().forEach(element => {
-      employees.push(<option value={element.id} key={element.id}>{element.employee}</option>)
+      employees.push(<option value={element.id} key={element.id}>{element.employee} ({element.role})</option>)
     });
     return employees;
   };
@@ -102,32 +106,29 @@ const HomePage = (props) => {
     return reportArray;
   };
 
-  const reportsBetweenDates = (dates) => {
-    let content = [];
+  const reportsBetweenDates = (reportId) => {
+    var employeeTotalHours = 0;
     getTimereportsInfo().forEach(report => {
-      dates.forEach(date => {
-        if (report.date === date) {
-          getProjectsInfo().forEach(project => {
-            if (report.project === project.id) {
-              getEmployeeInfo().forEach(employee => {
-                if (report.person === employee.id) {
-                  content.push(
-                    <div>
-                      <h3>{project.projectName}</h3>
-                      <h4>{employee.employee}</h4>
-                      <p>Report date: {report.date}</p>
-                      <p>Reported hours: {report.hours}</p>
-                      <p>Reporter&apos;s note: {report.note}</p>
-                    </div>
-                  );
-                };
-              });
-            };
-          });
+      reportId.forEach(dateId => {
+        if (report.id === dateId && report.person === SelectedEmployeeId) {
+            employeeTotalHours += report.hours;
         };
       });
     });
-    return content;
+    return <h3>Total Hours Worked: {employeeTotalHours}</h3>;
+  };
+
+  const projectHoursHoursLeft = () => {
+    let projects = [];
+    getProjectsInfo().forEach(project => {
+      projects.push(
+        <div className={styles.projectCard}>
+          <h3>{project.projectName}:</h3>
+          <p>Hours worked {project.projectProgress} of {project.projectHours}. Hours left {project.projectHoursLeft}</p>
+        </div>
+      );
+    });
+    return projects;
   };
 
   const displayPage = (role) => {
@@ -176,6 +177,8 @@ const HomePage = (props) => {
 
           <div className={styles.showReports}>
             <form>
+              <label htmlFor="project-status">View Project With Status Of: </label>
+              <br/>
               <select name="project-status" value={ProjectStatus} onChange={e => setProjectStatus(e.target.value)}>
                 <option disabled selected>Select project status</option>
                 {dropdownStatus()}
@@ -207,6 +210,13 @@ const HomePage = (props) => {
                 value={EndDate}
                 onChange={e => setEndDate(e.target.value)}
               />
+              <br/>
+              <label htmlFor="employeesTotHours">Employee: </label>
+              <br/>
+              <select name="employeesTotHours" value={SelectedEmployeeId} onChange={e => setSelectedEmployeeId(e.target.value)}>
+                <option disabled selected>Select Employee</option>
+                {dropdownNames()}
+              </select>
             </form>
             {reportsBetweenDates(checkBetweenDates())}
           </div>
@@ -214,12 +224,8 @@ const HomePage = (props) => {
       };
       if (role === "Project Leader") {
         return <div>
-
-        </div>
-      };
-      if (role === "Owner") {
-        return <div>
-
+          <h3>Projects Hours:</h3>
+          {projectHoursHoursLeft()}
         </div>
       };
   };
@@ -253,7 +259,7 @@ const HomePage = (props) => {
       check = report.date.split("-");
       let checkDate = new Date(check[0], parseInt(check[1])-1, check[2]);
       if (checkDate >= startDate && checkDate <= endDate) {
-        results.push(report.date)
+        results.push(report.id)
       };
       check = [];
     });
@@ -303,10 +309,35 @@ const HomePage = (props) => {
   //   })
   //   return projects;
   // }
+
+  // getTimereportsInfo().forEach(report => {
+  //   dates.forEach(date => {
+  //     if (report.date === date) {
+  //       getProjectsInfo().forEach(project => {
+  //         if (report.project === project.id) {
+  //           getEmployeeInfo().forEach(employee => {
+  //             if (report.person === employee.id) {
+  //               content.push(
+  //                 <div>
+  //                   <h3>{project.projectName}</h3>
+  //                   <h4>{employee.employee}</h4>
+  //                   <p>Report date: {report.date}</p>
+  //                   <p>Reported hours: {report.hours}</p>
+  //                   <p>Reporter&apos;s note: {report.note}</p>
+  //                 </div>
+  //               );
+  //             };
+  //           });
+  //         };
+  //       });
+  //     };
+  //   });
+  // });
+  //return content;
 // #endregion
 
 // #region Submit Forms
-  // Submits the form to notion.
+  // Submits report to notion.
   const submitForm = async (e) => {
     e.preventDefault();
     const response = await fetch(`http://localhost:${location.port}/api/sending`, {
@@ -314,9 +345,9 @@ const HomePage = (props) => {
       body: JSON.stringify({PeopleId, ProjectId, ReportDate, WorkedHours, Notes}),
     });
     if (response.status === 201) {
-      alert("Report sent!")
+      alert("Sent successfully!")
     } else {
-      alert("Report not sent! Check the terminal window for more information")
+      alert("Send failed! Check the terminal window for more information")
     }
   }
 // #endregion
@@ -330,6 +361,7 @@ const HomePage = (props) => {
   const [ProjectStatus, setProjectStatus] = useState("Select project status");
   const [StartDate, setStartDate] = useState(new Date());
   const [EndDate, setEndDate] = useState(new Date());
+  const [SelectedEmployeeId, setSelectedEmployeeId] = useState("Select Employee")
 // #endregion
 
 // #region Main Page Render
@@ -349,9 +381,9 @@ const HomePage = (props) => {
       <div className={styles.homePageContent}>
         <div className={styles.selectEmployee}> 
           <form>
-            <label htmlFor="employees">Employee: </label>
+            <label htmlFor="login">Login: </label>
             <br/>
-            <select name="employees" value={PeopleId} onChange={e => setPeopleId(e.target.value)}>
+            <select name="login" value={PeopleId} onChange={e => setPeopleId(e.target.value)}>
               <option disabled selected>Select Employee</option>
               {dropdownNames()}
             </select>
